@@ -5,6 +5,8 @@
 #include <windows.h>
 #include <stdio.h>
 
+// Memory flags we're interested pertaining to readability, writability, and execute 
+#define WRITABLE (PAGE_READWRITE | PAGE_WRITECOPY | PAGE_EXECUTE_READWRITE | PAGE_EXECUTE_WRITECOPY)
 
 /* REFERENCE for MEMORY_BASIC_INFORMATION
 
@@ -52,7 +54,7 @@ MEMBLOCK* create_memblock (HANDLE hProc, MEMORY_BASIC_INFORMATION *meminfo) {
 	// Allocate memory for the block
 	MEMBLOCK *mb = malloc (sizeof(MEMBLOCK));
 
-	// If successfully allocated
+	// If successfully allocated initialize the memblock
 	if (mb) {
 		mb->hProc = hProc;
 		mb->addr = meminfo->BaseAddress;
@@ -108,17 +110,22 @@ MEMBLOCK* create_scan (unsigned int pid) {
 				break;
 			}
 
-			// Create a local instance of the memory found through VirtualQueryEx
-			MEMBLOCK *mb = create_memblock (hProc, &meminfo);
+			// Filter out uncommitted/unused memory and memory that isn't writable
+			if ((meminfo.State & MEM_COMMIT) && (meminfo.Protect & WRITABLE)) {
 
-			// If valid, add to the head of our linked-list
-			if (mb) {
 
-				// Next pointer to current head of linked-list
-				mb->next = mb_list;
+				// Create a local instance of the memory found through VirtualQueryEx
+				MEMBLOCK *mb = create_memblock (hProc, &meminfo);
 
-				// Change head to our new memory block
-				mb_list = mb;
+				// If valid, add to the head of our linked-list
+				if (mb) {
+
+					// Next pointer to current head of linked-list
+					mb->next = mb_list;
+
+					// Change head to our new memory block
+					mb_list = mb;
+				}
 			}
 
 			// Update the next addr to begin search
@@ -126,4 +133,49 @@ MEMBLOCK* create_scan (unsigned int pid) {
 		}
 	}
 	return mb_list;
+}
+
+void free_scan (MEMBLOCK *mb_list) {
+
+	// Close the process handle we opened
+	CloseHandle (mb_list->hProc);
+
+	// Iterate through the linked list freeing memory blocks
+	while (mb_list) {
+
+		// Get head of the list
+		MEMBLOCK *mb = mb_list;
+
+		// Move start of the list to the next block
+		mb_list = mb_list->next;
+
+		// Free the block we pulled from the head of the list
+		free_memblock (mb);
+	}
+}
+
+void dump_scan_info (MEMBLOCK *mb_list) {
+
+	// Pointer to head of the linked-list
+	MEMBLOCK *mb = mb_list;
+
+	// Loop through the list
+	while (mb) {
+		printf("0x%08x %d\r\n", mb->addr, mb->size);
+		mb = mb->next;
+	}
+
+}
+
+int main(int argc, char *argv[]) {
+
+	// Create a scan given a PID
+	MEMBLOCK *scan = create_scan (atoi(argv[1]));
+
+	// If created dump info and free the memory
+	if (scan) {
+		dump_scan_info(scan);
+		free_scan(scan);
+	}
+	return 0;
 }
