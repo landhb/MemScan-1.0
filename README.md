@@ -19,13 +19,13 @@ sudo apt-get install mingw-w64
 Then you can create 32-bit Windows executable with:
 
 ```
-i686-w64-mingw32-gcc -o memscan.exe memscan.c
+i686-w64-mingw32-gcc -o memscan.exe memscan.c memread.c memblock.h
 ```
 
 And 64-bit Windows executable with:
 
 ```
-x86_64-w64-mingw32-gcc -o memscan.exe memscan.c
+x86_64-w64-mingw32-gcc -o memscan.exe memscan.c memread.c memblock.h
 ```
 
 #### Usage
