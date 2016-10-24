@@ -2,54 +2,13 @@
 // Written by: Bradley Landherr
 // Purpose: Scan memory of a process given a PID
 
-#include <windows.h>
-#include <stdio.h>
-
-// Memory flags we're interested pertaining to readability, writability, and execute 
-#define WRITABLE (PAGE_READWRITE | PAGE_WRITECOPY | PAGE_EXECUTE_READWRITE | PAGE_EXECUTE_WRITECOPY)
-
-/* REFERENCE for MEMORY_BASIC_INFORMATION
-
-https://msdn.microsoft.com/en-us/library/windows/desktop/aa366775(v=vs.85).aspx
-
-typedef struct _MEMORY_BASIC_INFORMATION {
-  PVOID  BaseAddress;
-  PVOID  AllocationBase;
-  DWORD  AllocationProtect;
-  SIZE_T RegionSize;
-  DWORD  State;
-  DWORD  Protect;
-  DWORD  Type;
-} MEMORY_BASIC_INFORMATION, *PMEMORY_BASIC_INFORMATION;
-
-
-*/
-
-// Define a data structure for our memory blocks
-typedef struct _MEMBLOCK {
-
-	// Handle of process we're interested in 
-	HANDLE hProc;
-
-	// Pointer for the base address of this process' memblock
-	unsigned char *addr;
-
-	// Size of memblock
-	int size;
-
-	// Local buffer to copy data into for reading/writing
-	unsigned char *buffer;
-
-	// Pointer to the next memory block in the series (arranging as a linked-list)
-	struct _MEMBLOCK *next;
-
-} MEMBLOCK;
+#include "memblock.h"
 
 
 // Function: Create a memblock
 // Returns: pointer to a memory block
 // VirtualQueryEx returns the MEMORY_BASIC_INFORMATION structure
-MEMBLOCK* create_memblock (HANDLE hProc, MEMORY_BASIC_INFORMATION *meminfo) {
+MEMBLOCK* create_memblock (HANDLE hProc, MEMORY_BASIC_INFORMATION *meminfo, int data_size) {
 	
 	// Allocate memory for the block
 	MEMBLOCK *mb = malloc (sizeof(MEMBLOCK));
@@ -60,7 +19,13 @@ MEMBLOCK* create_memblock (HANDLE hProc, MEMORY_BASIC_INFORMATION *meminfo) {
 		mb->addr = meminfo->BaseAddress;
 		mb->size = meminfo->RegionSize;
 		mb->buffer = malloc(meminfo->RegionSize);
+		mb->searchmask = malloc(meminfo->RegionSize/8);
+		memset (mb->searchmask, 0xff, meminfo->RegionSize/8);
+		mb->matches = meminfo->RegionSize;
+		mb->data_size = data_size;
 		mb->next = NULL;
+	} else {
+		printf("%s\n", "Error: Could not allocate memory for memblock");
 	}
 
 	return mb;
@@ -76,14 +41,19 @@ void free_memblock (MEMBLOCK *mb) {
 		if (mb->buffer) {
 			free (mb->buffer);
 		}
+		if (mb->searchmask) {
+			free (mb->searchmask);
+		}
 
 		free (mb);
 	}
 }
 
+
+
 // Function: Create scan
 // Returns: Pointer to memblock that is the head of a complete linked list of the memoryblocks of a process
-MEMBLOCK* create_scan (unsigned int pid) {
+MEMBLOCK* create_scan (unsigned int pid, int data_size) {
 
 	// Initialize the pointer to the head of our linked list
 	MEMBLOCK *mb_list = NULL;
@@ -115,7 +85,7 @@ MEMBLOCK* create_scan (unsigned int pid) {
 
 
 				// Create a local instance of the memory found through VirtualQueryEx
-				MEMBLOCK *mb = create_memblock (hProc, &meminfo);
+				MEMBLOCK *mb = create_memblock (hProc, &meminfo, data_size);
 
 				// If valid, add to the head of our linked-list
 				if (mb) {
@@ -131,6 +101,8 @@ MEMBLOCK* create_scan (unsigned int pid) {
 			// Update the next addr to begin search
 			addr = (unsigned char*)meminfo.BaseAddress + meminfo.RegionSize;
 		}
+	} else {
+		printf("%s %d %s\n", "Exiting: Process ", pid, " not found.");
 	}
 	return mb_list;
 }
@@ -161,20 +133,30 @@ void dump_scan_info (MEMBLOCK *mb_list) {
 
 	// Loop through the list
 	while (mb) {
+		int i;
 		printf("0x%08x %d\r\n", mb->addr, mb->size);
+
+		for (i = 0; i < mb->size; i++) {
+			printf("%02x", mb->buffer[i]);
+		}
+		printf("\r\n");
 		mb = mb->next;
 	}
 
 }
 
+
 int main(int argc, char *argv[]) {
 
 	// Create a scan given a PID
-	MEMBLOCK *scan = create_scan (atoi(argv[1]));
+	MEMBLOCK *scan = create_scan (atoi(argv[1]), 4);
 
 	// If created dump info and free the memory
 	if (scan) {
-		dump_scan_info(scan);
+		read_scan(scan, COND_EQUALS, atoi(argv[2]));
+		//dump_scan_info(scan);
+		print_matches(scan);
+		get_match_count(scan);
 		free_scan(scan);
 	}
 	return 0;
