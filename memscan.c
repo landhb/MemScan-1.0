@@ -67,16 +67,21 @@ MEMBLOCK* create_scan (unsigned int pid, int data_size) {
 	// Handle to the process we're interested in (need PROCESS_ALL_ACCESS to manipulate the process' memory)
 	HANDLE hProc = OpenProcess (PROCESS_ALL_ACCESS, FALSE, pid);
 
+	// SYSTEM INFO to check bounds of VirtualQueryEx
+	SYSTEM_INFO si;
+	GetSystemInfo(&si);
+
 	// If we recieve a valid process handle
 	if (hProc) {
 
 		// Loop through process memory
-		while (1) {
+		while (addr < (unsigned char *)si.lpMaximumApplicationAddress) {
 
 			// VirtualQueryEx takes (handle of process, address to start looking from, result variable, sizeof(result))
 			// Returns non-zero if successful
 			if (VirtualQueryEx (hProc, addr, &meminfo, sizeof(meminfo)) == 0) {
 				// If VirtualQueryEx returns zero, exit due to failure (or end of memory for process)
+				printf("%s %s\n", "VirtualQueryEx Error: ", GetLastErrorAsString());
 				break;
 			}
 
@@ -152,12 +157,16 @@ int main(int argc, char *argv[]) {
 	MEMBLOCK *scan = create_scan (atoi(argv[1]), 4);
 
 	// If created dump info and free the memory
+
 	if (scan) {
+		printf("%s\n", "Created scan");
 		read_scan(scan, COND_EQUALS, atoi(argv[2]));
 		//dump_scan_info(scan);
 		print_matches(scan);
 		get_match_count(scan);
 		free_scan(scan);
+	}else {
+		printf("%s\n", "Failed to create scan...");
 	}
 	return 0;
 }
