@@ -153,8 +153,12 @@ void dump_scan_info (MEMBLOCK *mb_list) {
 
 int main(int argc, char *argv[]) {
 
+
+	// Get the PID of the given process
+	DWORD pid = FindProcessId(argv[1]);
+
 	// Create a scan given a PID
-	MEMBLOCK *scan = create_scan (atoi(argv[1]), 4);
+	MEMBLOCK *scan = create_scan (pid, 4);
 
 	// If created dump info and free the memory
 
