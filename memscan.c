@@ -154,6 +154,12 @@ void dump_scan_info (MEMBLOCK *mb_list) {
 int main(int argc, char *argv[]) {
 
 
+	// Usage
+	if ( argc != 3) {
+		Usage();
+	}
+
+
 	// Get the PID of the given process
 	unsigned int pid = FindProcessId(argv[1]);
 

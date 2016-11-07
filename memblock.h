@@ -86,6 +86,8 @@ unsigned int peek (HANDLE hProc, int data_size, unsigned char * addr);
 
 // Error Handling
 const char * GetLastErrorAsString();
+void Usage();
 
 // Process Helpers
 DWORD FindProcessId(const char *processname);
+

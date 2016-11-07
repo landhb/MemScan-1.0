@@ -18,3 +18,13 @@ const char * GetLastErrorAsString()
 
     return messageBuffer;
 }
+
+void Usage() {
+    printf(
+        "\nUsage for Memscan.exe:\n"
+        "\nmemscan.exe [Executable Name] [Search String]\n\n"
+        "Options are:\n"
+        "    [Executable Name]: Name of the exe that owns the process you wish to examine. (i.e. chrome.exe)\n"
+        "      [Search String]: The search term you're looking for in the process\n"
+        "               --help: display what you are reading now\n");
+}
