@@ -5,6 +5,7 @@
 #include <windows.h>
 #include <stdio.h>
 
+
 // Memory flags we're interested pertaining to readability, writability, and execute 
 #define WRITABLE (PAGE_READWRITE | PAGE_WRITECOPY | PAGE_EXECUTE_READWRITE | PAGE_EXECUTE_WRITECOPY)
 
@@ -77,3 +78,14 @@ typedef enum {
 
 void read_memblock (MEMBLOCK *mb, SEARCH_CONDITION condition, unsigned int val);
 void read_scan (MEMBLOCK *mb_list, SEARCH_CONDITION condition, unsigned int val);
+
+// Write functions
+
+void poke (HANDLE hProc, int data_size, unsigned int addr, unsigned int val);
+unsigned int peek (HANDLE hProc, int data_size, unsigned int addr);
+
+// Error Handling
+const char * GetLastErrorAsString();
+
+// Process Helpers
+DWORD FindProcessId(const char *processname);
