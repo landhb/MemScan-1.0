@@ -157,6 +157,7 @@ int main(int argc, char *argv[]) {
 	// Usage
 	if ( argc != 3) {
 		Usage();
+		return 1;
 	}
 
 
@@ -164,7 +165,7 @@ int main(int argc, char *argv[]) {
 	unsigned int pid = FindProcessId(argv[1]);
 
 	if (pid == 0) {
-		return 1;
+		return 2;
 	}
 
 	// Create a scan given a PID
