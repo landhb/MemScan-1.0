@@ -30,6 +30,8 @@ x86_64-w64-mingw32-gcc -o memscan.exe memscan.c memread.c memblock.h
 
 #### Usage
 
+Program takes the name of the exe (i.e. "slack.exe") running the process you'd like to examine and the search string.
+
 ```
-.\memscan.exe [PID] [Search String]
+.\memscan.exe [Process Name] [Search String]
 ```
