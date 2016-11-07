@@ -123,7 +123,8 @@ void print_matches (MEMBLOCK *mb_list) {
 	while(mb) {
 		for (offset = 0; offset < mb->size; offset += mb->data_size) {
 			if (IS_IN_SEARCH(mb,offset)) {
-				printf("%0x08x\r\n", mb->addr + offset);
+				unsigned int val = peek(mb->hProc, mb->data_size, (unsigned int) mb->addr + offset);
+				printf("%0x08x: 0x%08x (%d) \r\n", mb->addr + offset, val, val);
 			}
 		}
 		mb = mb->next;
