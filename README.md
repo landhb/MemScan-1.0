@@ -31,5 +31,5 @@ x86_64-w64-mingw32-gcc -o memscan.exe memscan.c memread.c memblock.h
 #### Usage
 
 ```
-.\memscan.exe [PID]
+.\memscan.exe [PID] [Search String]
 ```
