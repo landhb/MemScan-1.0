@@ -81,8 +81,8 @@ void read_scan (MEMBLOCK *mb_list, SEARCH_CONDITION condition, unsigned int val)
 
 // Write functions
 
-void poke (HANDLE hProc, int data_size, unsigned int addr, unsigned int val);
-unsigned int peek (HANDLE hProc, int data_size, unsigned int addr);
+void poke (HANDLE hProc, int data_size, unsigned int *addr, unsigned int val);
+unsigned int peek (HANDLE hProc, int data_size, unsigned char * addr);
 
 // Error Handling
 const char * GetLastErrorAsString();
