@@ -1,5 +1,6 @@
 #include <windows.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 //Returns the last Win32 error, in string format. Returns an empty string if there is no error.
 const char * GetLastErrorAsString()
@@ -23,8 +24,11 @@ void Usage() {
     printf(
         "\nUsage for Memscan.exe:\n"
         "\nmemscan.exe [Executable Name] [Search String]\n\n"
-        "Options are:\n"
+        "Arguments are:\n"
         "    [Executable Name]: Name of the exe that owns the process you wish to examine. (i.e. chrome.exe)\n"
-        "      [Search String]: The search term you're looking for in the process\n"
-        "               --help: display what you are reading now\n");
+        "    [Search String  ]: The search term you're looking for in the process\n"
+        "\nOptions are:\n"
+        "              --help : display what you are reading now\n");
+
+    exit(EXIT_FAILURE);
 }

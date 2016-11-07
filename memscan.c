@@ -157,7 +157,6 @@ int main(int argc, char *argv[]) {
 	// Usage
 	if ( argc != 3) {
 		Usage();
-		return 1;
 	}
 
 
