@@ -3,11 +3,11 @@
 #include <tlhelp32.h>
 #include <tchar.h>
 
-DWORD FindProcessId(const char *processname)
+unsigned int FindProcessId(const char *processname)
 {
     HANDLE hProcessSnap;
     PROCESSENTRY32 pe32;
-    DWORD result = NULL;
+    unsigned int result = NULL;
 
     // Take a snapshot of all processes in the system.
     hProcessSnap = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
@@ -21,7 +21,7 @@ DWORD FindProcessId(const char *processname)
     {
         CloseHandle(hProcessSnap);          // clean the snapshot object
         printf("!!! Failed to gather information on system processes! \n");
-        return (DWORD)NULL;
+        return 0;
     }
 
     do
