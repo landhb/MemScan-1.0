@@ -16,16 +16,16 @@ To create Windows executables in the linux subsystem, you need to install mingw 
 sudo apt-get install mingw-w64
 ```
 
-Then you can create 32-bit Windows executable with:
+Then you can create 32-bit Windows executables using the makefile with:
 
 ```
-i686-w64-mingw32-gcc -o memscan.exe memscan.c memread.c memblock.h
+make 32bit
 ```
 
-And 64-bit Windows executable with:
+And 64-bit Windows executables with:
 
 ```
-x86_64-w64-mingw32-gcc -o memscan.exe memscan.c memread.c memblock.h
+make 64bit
 ```
 
 #### Usage
