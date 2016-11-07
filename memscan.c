@@ -155,7 +155,11 @@ int main(int argc, char *argv[]) {
 
 
 	// Get the PID of the given process
-	DWORD pid = FindProcessId(argv[1]);
+	unsigned int pid = FindProcessId(argv[1]);
+
+	if (pid == 0) {
+		return 1;
+	}
 
 	// Create a scan given a PID
 	MEMBLOCK *scan = create_scan (pid, 4);
