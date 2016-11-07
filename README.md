@@ -35,3 +35,5 @@ Program takes the name of the exe (i.e. "slack.exe") running the process you'd l
 ```
 .\memscan.exe [Process Name] [Search String]
 ```
+
+Note: memscan.exe must be compiled as a 64bit executable to examine 64 bit processes 
