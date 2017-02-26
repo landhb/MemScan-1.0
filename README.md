@@ -7,6 +7,7 @@
 3. Modify the content of the memory locally
 4. Write the modified memory back into the process with [WriteProcessMemory](https://msdn.microsoft.com/en-us/library/windows/desktop/ms681674(v=vs.85).aspx)
 
+![Unique String](https://github.com/landhb/MemScan-1.0/blob/master/img/example.PNG?raw=true "Scan unique string")
 
 #### Compiling w/Linux Subsystem
 
