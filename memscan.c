@@ -167,6 +167,7 @@ int main(int argc, char *argv[]) {
 	unsigned int pid = FindProcessId(argv[1]);
 
 	if (pid == 0) {
+		printf("Failed to find process %s\n", argv[1]);
 		return 2;
 	}
 
@@ -180,9 +181,7 @@ int main(int argc, char *argv[]) {
 
 	}
 
-	// Create a scan given a PID
-	MEMBLOCK *scan = create_scan (pid, size); //sizeof(argv[2])
-
+	MEMBLOCK * scan = create_scan (pid, size); 
 
 	// If created dump info and free the memory
 
@@ -196,5 +195,6 @@ int main(int argc, char *argv[]) {
 	}else {
 		printf("%s\n", "Failed to create scan...");
 	}
+
 	return 0;
 }

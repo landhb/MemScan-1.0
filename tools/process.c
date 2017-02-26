@@ -7,11 +7,11 @@ unsigned int FindProcessId(const char *processname)
 {
     HANDLE hProcessSnap;
     PROCESSENTRY32 pe32;
-    unsigned int result = NULL;
+    unsigned int result = 0;
 
     // Take a snapshot of all processes in the system.
     hProcessSnap = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
-    if (INVALID_HANDLE_VALUE == hProcessSnap) return(FALSE);
+    if (INVALID_HANDLE_VALUE == hProcessSnap) return(result);
 
     pe32.dwSize = sizeof(PROCESSENTRY32); // <----- IMPORTANT
 
@@ -21,7 +21,7 @@ unsigned int FindProcessId(const char *processname)
     {
         CloseHandle(hProcessSnap);          // clean the snapshot object
         printf("!!! Failed to gather information on system processes! \n");
-        return 0;
+        return result;
     }
 
     do
