@@ -5,62 +5,48 @@
 
 #include "memblock.h"
 
-int _search_memblock (MEMBLOCK *mb, SEARCH_CONDITION condition, unsigned int val, unsigned char* tempbuf, SIZE_T bytes_read, unsigned int total_read) {
+int _search_memblock (MEMBLOCK *mb, SEARCH_CONDITION condition, unsigned char * val, unsigned char* tempbuf, SIZE_T bytes_read, unsigned int total_read, int size) {
 
-	// Conduct the search
-	if (condition == COND_UNCONDITIONAL) {
-		// Search all
-		memset (mb->searchmask + (total_read/8), 0xff, bytes_read/8);
-		mb->matches += bytes_read;
-	}
-	else {
-		unsigned int offset;
 
-		for (offset = 0; offset < bytes_read;  offset += mb->data_size) {
-			// Check if byte is still in search, conduct search
-			if (IS_IN_SEARCH(mb, (total_read + offset))) {
-				BOOL is_match = FALSE;
-				unsigned int temp_val;
+	unsigned int offset;
 
-				switch (mb->data_size) {
-					// Case of 1 byte data size
-					case 1:
-						// temp_val is just the bit at the offset in the byte
-						temp_val = tempbuf[offset];
-						break;
-					case 2:
-						temp_val = *((unsigned short*) &tempbuf[offset]);
-						break;
-					case 4:
-					default:
-						temp_val = *((unsigned int *)&tempbuf[offset]);
-						break;
-				}
+	// Iterate through the tempbuf comparing memory to the search value
+	for (offset = 0; offset < bytes_read - size;  ++offset) {
+		// Check if byte is still in search, conduct search
+		if (IS_IN_SEARCH(mb, (total_read + offset))) {
+			BOOL is_match = 0;
+			unsigned char temp_val[size+1];
 
-				switch (condition) {
-					case COND_EQUALS:
-						is_match = (temp_val == val);
-						break;
-					default:
-						break;
-				}
+			switch (condition) {
+				case COND_EQUALS:
 
-				// If match, increment counter, else remove from search bitmap
-				if (is_match) {
-					mb->matches++;
-				}
-				else {
-					REMOVE_FROM_SEARCH (mb, (total_read + offset));
-				}
+					// Compare memory at the offset of length size
+					is_match = memcmp(&tempbuf[offset], val, size);
+					//printf("%d\n", is_match);
+					//printf("%0x08x: 0x%08x (%s) - Tmp: 0x%08x (%s) \r\n", mb->addr + offset, val, val, temp_val, temp_val);
+					break;
+				default:
+					break;
+			}
+
+			// If match, increment counter, else remove from search bitmap
+			if (is_match == 0) {
+				//printf("%s\n", size);
+				printf("%0x08x: %.*s\n", mb->addr + offset,  size, tempbuf + offset);
+				//printf("%0x08x: 0x%08x (%s) - Tmp: 0x%08x (%.*s) %d\r\n", mb->addr + offset, val, tempbuf[offset], tempbuf, size, tempbuf + offset);
+				mb->matches++;
+			}
+			else {
+				REMOVE_FROM_SEARCH (mb, (total_read + offset));
 			}
 		}
+		
 	}
-
 }
 
 // Function: Read the contents of a memblock using ReadProcessMemory
 // Returns: Buffer of read memory in mb->buffer
-void read_memblock (MEMBLOCK *mb, SEARCH_CONDITION condition, unsigned int val) {
+void read_memblock (MEMBLOCK *mb, SEARCH_CONDITION condition, unsigned char * val, int size) {
 
 	// local buffer
 	static unsigned char tempbuf[128*1024];
@@ -90,7 +76,7 @@ void read_memblock (MEMBLOCK *mb, SEARCH_CONDITION condition, unsigned int val) 
 		}
 		
 		// Search memblock 
-		_search_memblock (mb, condition, val, tempbuf, bytes_read, total_read);
+		_search_memblock (mb, condition, val, tempbuf, bytes_read, total_read, size);
 
 		// Copy tempbuf onto the mb->buffer
 		memcpy(mb->buffer + total_read, tempbuf, bytes_read);
@@ -105,26 +91,26 @@ void read_memblock (MEMBLOCK *mb, SEARCH_CONDITION condition, unsigned int val) 
 }
 
 // Loop through linked list reading memory for each block
-void read_scan (MEMBLOCK *mb_list, SEARCH_CONDITION condition, unsigned int val){
+void read_scan (MEMBLOCK *mb_list, SEARCH_CONDITION condition, unsigned char * val, int size){
 
 	MEMBLOCK *mb = mb_list;
 
 	while (mb) {
-		read_memblock(mb, condition, val);
+		read_memblock(mb, condition, val, size);
 		mb = mb->next;
 	}
 }
 
-void print_matches (MEMBLOCK *mb_list) {
+void print_matches (MEMBLOCK *mb_list, int size) {
 	unsigned int offset;
 
 	MEMBLOCK *mb = mb_list;
 
 	while(mb) {
 		for (offset = 0; offset < mb->size; offset += mb->data_size) {
-			if (IS_IN_SEARCH(mb,offset)) {
-				unsigned int val = peek(mb->hProc, mb->data_size, mb->addr + offset);
-				printf("%0x08x: 0x%08x (%d) \r\n", mb->addr + offset, val, val);
+			if (IS_IN_SEARCH(mb, offset)) {
+				unsigned char * val = peek(mb->hProc, mb->data_size, mb->addr + offset, size);
+				printf("%0x08x: 0x%08x (%s) \r\n", mb->addr + offset, val, val);
 			}
 		}
 		mb = mb->next;

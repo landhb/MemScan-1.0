@@ -76,13 +76,13 @@ typedef enum {
 
 // Read functions
 
-void read_memblock (MEMBLOCK *mb, SEARCH_CONDITION condition, unsigned int val);
-void read_scan (MEMBLOCK *mb_list, SEARCH_CONDITION condition, unsigned int val);
+void read_memblock (MEMBLOCK *mb, SEARCH_CONDITION condition, unsigned char * val, int size);
+void read_scan (MEMBLOCK *mb_list, SEARCH_CONDITION condition, unsigned char * val, int size);
 
 // Write functions
 
-void poke (HANDLE hProc, int data_size, unsigned int *addr, unsigned int val);
-unsigned int peek (HANDLE hProc, int data_size, unsigned char * addr);
+void poke (HANDLE hProc, int data_size, unsigned int *addr, unsigned char * val);
+unsigned char * peek (HANDLE hProc, int data_size, unsigned char * addr, int size);
 
 // Error Handling
 const char * GetLastErrorAsString();

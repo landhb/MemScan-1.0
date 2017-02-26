@@ -71,6 +71,7 @@ MEMBLOCK* create_scan (unsigned int pid, int data_size) {
 	SYSTEM_INFO si;
 	GetSystemInfo(&si);
 
+
 	// If we recieve a valid process handle
 	if (hProc) {
 
@@ -90,7 +91,7 @@ MEMBLOCK* create_scan (unsigned int pid, int data_size) {
 
 
 				// Create a local instance of the memory found through VirtualQueryEx
-				MEMBLOCK *mb = create_memblock (hProc, &meminfo, data_size);
+				MEMBLOCK *mb = create_memblock (hProc, &meminfo, meminfo.RegionSize);
 
 				// If valid, add to the head of our linked-list
 				if (mb) {
@@ -142,7 +143,9 @@ void dump_scan_info (MEMBLOCK *mb_list) {
 		printf("0x%08x %d\r\n", mb->addr, mb->size);
 
 		for (i = 0; i < mb->size; i++) {
-			printf("%02x", mb->buffer[i]);
+			//printf("%02x", mb->buffer[i]);
+
+			printf("%s", &mb->buffer[i]);
 		}
 		printf("\r\n");
 		mb = mb->next;
@@ -167,16 +170,27 @@ int main(int argc, char *argv[]) {
 		return 2;
 	}
 
+	// Get size of search string
+	int size;
+	for (size = 0; size < 40; size++){
+
+		if (argv[2][size] == '\0') {
+			break;
+		} 
+
+	}
+
 	// Create a scan given a PID
-	MEMBLOCK *scan = create_scan (pid, 4);
+	MEMBLOCK *scan = create_scan (pid, size); //sizeof(argv[2])
+
 
 	// If created dump info and free the memory
 
 	if (scan) {
 		printf("%s\n", "Created scan");
-		read_scan(scan, COND_EQUALS, atoi(argv[2]));
+		read_scan(scan, COND_EQUALS, argv[2], size);
 		//dump_scan_info(scan);
-		print_matches(scan);
+		//print_matches(scan, size);
 		get_match_count(scan);
 		free_scan(scan);
 	}else {
