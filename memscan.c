@@ -172,13 +172,10 @@ int main(int argc, char *argv[]) {
 	}
 
 	// Get size of search string
-	int size;
-	for (size = 0; size < 40; size++){
+	int size = 0;
+	while(argv[2][size] != '\0') {
 
-		if (argv[2][size] == '\0') {
-			break;
-		} 
-
+		size++;
 	}
 
 	MEMBLOCK * scan = create_scan (pid, size); 
@@ -189,7 +186,7 @@ int main(int argc, char *argv[]) {
 		printf("%s\n", "Created scan");
 		read_scan(scan, COND_EQUALS, argv[2], size);
 		//dump_scan_info(scan);
-		//print_matches(scan, size);
+		print_matches(scan, size);
 		get_match_count(scan);
 		free_scan(scan);
 	}else {
