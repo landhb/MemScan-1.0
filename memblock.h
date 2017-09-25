@@ -78,6 +78,9 @@ typedef enum {
 
 void read_memblock (MEMBLOCK *mb, SEARCH_CONDITION condition, unsigned char * val, int size);
 void read_scan (MEMBLOCK *mb_list, SEARCH_CONDITION condition, unsigned char * val, int size);
+void print_matches (MEMBLOCK *mb_list, int size);
+int get_match_count (MEMBLOCK *mb_list);
+
 
 // Write functions
 
